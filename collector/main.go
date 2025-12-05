@@ -57,7 +57,7 @@ func main() {
 }
 
 func initLogger() *zap.Logger {
-	lvl := zap.NewAtomicLevelAt(zapcore.InfoLevel)
+	lvl := zap.NewAtomicLevelAt(zapcore.WarnLevel)
 	envLvl := getEnvironment("OPENTELEMETRY_EXTENSION_LOG_LEVEL", "warn")
 	// When not set, Getenv returns empty string
 	var err error
@@ -85,4 +85,3 @@ func getEnvironment(key string, defaultValue string) string {
 	}
 	return value
 }
-
