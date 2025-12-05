@@ -10,10 +10,10 @@ import {
 import {
   BatchSpanProcessor,
   InMemorySpanExporter
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace-node';
 
 import { registerLoader } from '../src/loader.mjs';
-import { wrap, unwrap } from '../build/src/wrapper.js';
+import { init, wrap, unwrap } from '../build/src/wrapper.js';
 
 const DIR_NAME = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -25,7 +25,7 @@ const assertHandlerSpan = (span) => {
   assert.strictEqual(span.status.message, undefined);
 };
 
-describe('when loading ESM module', () => {
+describe('when loading ESM module', async () => {
   let oldEnv;
   const memoryExporter = new InMemorySpanExporter();
 
@@ -35,17 +35,21 @@ describe('when loading ESM module', () => {
     awsRequestId: 'aws_request_id',
   };
 
+  await init();
+
   const initializeHandler = async (handler) => {
     process.env._HANDLER = handler;
 
-    global.configureTracerProvider = (tracerProvider) => {
-      tracerProvider.addSpanProcessor(new BatchSpanProcessor(memoryExporter));
+    global.configureTracer = (_) => {
+      return {
+        spanProcessors: [new BatchSpanProcessor(memoryExporter)],
+      };
     };
     global.configureMeter = (_) => { {} };
     global.configureMeterProvider = (_) => {};
     global.configureLoggerProvider = (_) => {};
 
-    wrap();
+    await wrap();
   };
 
   const loadHandler = async (handler) => {
@@ -61,18 +65,18 @@ describe('when loading ESM module', () => {
     registerLoader();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     oldEnv = { ...process.env };
     process.env.LAMBDA_TASK_ROOT = DIR_NAME;
 
-    unwrap();
+    await unwrap();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     process.env = oldEnv;
     memoryExporter.reset();
 
-    unwrap();
+    await unwrap();
   });
 
   it('should wrap ESM file handler with .mjs extension', async () => {
