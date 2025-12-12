@@ -7,27 +7,30 @@ on:
       - layer-nodejs/**
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
 
 jobs:
   create-release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Create Release
         run: gh release create ${{ github.ref_name }} --draft --title ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build-layer:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     needs: create-release
     outputs:
       NODEJS_VERSION: ${{ steps.save-node-sdk-version.outputs.SDK_VERSION}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: 18
 
@@ -40,7 +43,7 @@ jobs:
       - name: Save Node SDK Version
         id: save-node-sdk-version
         run: |
-          SDK_VERSION=$(node version.js)
+          SDK_VERSION=$(npm list @opentelemetry/core --depth=0 | grep @opentelemetry/core | sed 's/^.*@//')
           echo "SDK_VERSION=$SDK_VERSION" >> $GITHUB_OUTPUT
         working-directory: nodejs/packages/layer/scripts
 
@@ -48,7 +51,7 @@ jobs:
         run: mv layer.zip opentelemetry-nodejs-layer.zip
         working-directory: nodejs/packages/layer/build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         name: Save assembled layer to build
         with:
           name: opentelemetry-nodejs-layer.zip
@@ -61,6 +64,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-layer:
+    permissions: # required by the reusable workflow
+      contents: read
+      id-token: write
     uses: ./.github/workflows/layer-publish.yml
     needs: build-layer
     strategy:
@@ -87,7 +93,9 @@ jobs:
       layer-name: opentelemetry-nodejs
       component-version: ${{needs.build-layer.outputs.NODEJS_VERSION}}
       # architecture:
-      runtimes: nodejs18.x nodejs20.x
+      # If you add a nodejs runtime here, please make sure that the collector/Makefile publish and publish-layer targets
+      # get updated as well
+      runtimes: nodejs20.x nodejs22.x nodejs24.x
       release-group: prod
       aws_region: ${{ matrix.aws_region }}
     secrets: inherit

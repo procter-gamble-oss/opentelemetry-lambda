@@ -7,10 +7,10 @@ import {
   BatchSpanProcessor,
   InMemorySpanExporter,
   ReadableSpan,
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace-node';
 import { Context } from 'aws-lambda';
 
-import { wrap, unwrap } from '../src/wrapper';
+import { init, wrap, unwrap } from '../src/wrapper';
 
 const assertHandlerSpan = (span: ReadableSpan) => {
   assert.strictEqual(span.kind, SpanKind.SERVER);
@@ -20,7 +20,7 @@ const assertHandlerSpan = (span: ReadableSpan) => {
   assert.strictEqual(span.status.message, undefined);
 };
 
-describe('when loading ESM module', () => {
+describe('when loading ESM module', async () => {
   let oldEnv: NodeJS.ProcessEnv;
   const memoryExporter = new InMemorySpanExporter();
 
@@ -30,11 +30,15 @@ describe('when loading ESM module', () => {
     awsRequestId: 'aws_request_id',
   } as Context;
 
+  await init();
+
   const initializeHandler = async (handler: string) => {
     process.env._HANDLER = handler;
 
-    global.configureTracerProvider = tracerProvider => {
-      tracerProvider.addSpanProcessor(new BatchSpanProcessor(memoryExporter));
+    global.configureTracer = _ => {
+      return {
+        spanProcessors: [new BatchSpanProcessor(memoryExporter)],
+      };
     };
     global.configureMeter = _ => {
       return {} as any;
@@ -42,7 +46,7 @@ describe('when loading ESM module', () => {
     global.configureMeterProvider = _ => {};
     global.configureLoggerProvider = _ => {};
 
-    wrap();
+    await wrap();
   };
 
   const loadHandler = async (handler: string) => {
@@ -57,18 +61,18 @@ describe('when loading ESM module', () => {
     return await loadHandler(handlerFileName);
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     oldEnv = { ...process.env };
     process.env.LAMBDA_TASK_ROOT = __dirname;
 
-    unwrap();
+    await unwrap();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     process.env = oldEnv;
     memoryExporter.reset();
 
-    unwrap();
+    await unwrap();
   });
 
   it('should wrap CommonJS file handler with .cjs extension', async () => {
