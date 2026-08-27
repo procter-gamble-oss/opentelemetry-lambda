@@ -354,6 +354,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/s3pro
 github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/s3provider v0.159.0/go.mod h1:H0TiqGResMSpIA1D/wCKOeTFjefZK3aN8RyNubNkdvo=
 github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/secretsmanagerprovider v0.159.0 h1:hlKhB2ewD3RA4xmeg2anLIYU9J4RiFXQY6MfCFWmWH8=
 github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/secretsmanagerprovider v0.159.0/go.mod h1:wf39VhkvBBUcxxxSpgD8CGcoIf4rihO9PjnWey/tAE4=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.159.0 h1:eui64EPMYUuOkmE3jjHaLLkP0rsobriX8HKZi4UZSX8=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.159.0/go.mod h1:Lf2mQqgMkIAN5rEXjFpflB08y6pNWdV74XNhct5W48o=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.159.0 h1:qNPUOAgqz3Jq582CWcX605tTcHD9rmWYxtgO+OVgCqo=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.159.0/go.mod h1:Z0a4mse7pSzMvyWVZRUgcRnK9hbagF3Zt7alb4zY+TM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.159.0 h1:9MGptirtNasrWqiJaxxOL35aLMb7kOxNKDaPKWN5fMA=

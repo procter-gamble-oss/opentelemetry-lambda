@@ -131,6 +131,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.159.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.159.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.159.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension v0.159.0 // indirect
