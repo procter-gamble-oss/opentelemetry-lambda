@@ -1,0 +1,210 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    'helpers:pinGitHubActionDigestsToSemver',
+    ':separateMultipleMajorReleases',
+  ],
+  gitIgnoredAuthors: [
+    "107717825+opentelemetrybot@users.noreply.github.com",
+    "107717825+opentelemetrybot[bot]@users.noreply.github.com",
+    "197425009+otelbot@users.noreply.github.com",
+    "197425009+otelbot[bot]@users.noreply.github.com",
+    "github-actions[bot]@users.noreply.github.com"
+  ],
+  prHourlyLimit: 15,
+  prConcurrentLimit: 15,
+  ignorePaths: [
+    // re‑declare everything best-practices ignores
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/.cache/**",
+  ],
+  packageRules: [
+    {
+      groupName: 'collector-other',
+      matchUpdateTypes: [
+        '!major'
+      ],
+      matchCategories: [
+        'golang',
+      ],
+      postUpdateOptions: [
+        'gomodTidy',
+      ],
+      semanticCommitType: 'build',
+      schedule: [
+        'before 8am on Monday',
+      ],
+    },
+    {
+      groupName: 'opentelemetry-deps-collector',
+      matchUpdateTypes: [
+        '!major'
+      ],
+      matchPackageNames: [
+        'go.opentelemetry.io{/,}**',
+        'github.com/open-telemetry{/,}**'
+      ],
+      matchCategories: [
+        'golang',
+      ],
+      postUpdateOptions: [
+        'gomodTidy',
+      ],
+      semanticCommitType: 'build',
+      schedule: [
+        'before 8am on Monday',
+      ],
+    },
+    {
+      groupName: '{{categories}}-other',
+      matchUpdateTypes: [
+        '!major',
+        '!lockFileMaintenance',
+      ],
+      matchCategories: [
+        '!golang',
+      ],
+      semanticCommitType: 'build',
+      schedule: [
+        'before 8am on Monday'
+      ],
+    },
+    {
+      groupName: 'opentelemetry-deps-{{categories}}',
+      matchUpdateTypes: [
+        '!major',
+        '!lockFileMaintenance',
+      ],
+      matchCategories: [
+        '!golang',
+      ],
+      matchDepNames: [
+        '@opentelemetry/**',
+        'io.opentelemetry.**',
+        'OpenTelemetry.**',
+        'opentelemetry-**',
+      ],
+      schedule: [
+        'before 8am on Monday'
+      ],
+      semanticCommitType: 'build',
+    },
+    {
+      matchPackageNames: [
+        'io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha',
+        'io.opentelemetry.contrib:opentelemetry-aws-resources',
+        'opentelemetry-*',
+      ],
+      // Renovate's default behavior is only to update from unstable -> unstable if it's for the
+      // major.minor.patch, under the assumption that you would want to update to the stable version
+      // of that release instead of the unstable version for a future release (but there's never any
+      // stable version of opentelemetry-instrumentation-bom-alpha so this logic doesn't apply
+      ignoreUnstable: false,
+      allowedVersions: '!/\\-SNAPSHOT$/'
+    },
+    {
+      groupName: 'actions',
+      matchUpdateTypes: [
+        '!major'
+      ],
+      matchManagers: [
+        'github-actions',
+      ],
+      semanticCommitType: 'build',
+      addLabels: [
+        'github_actions',
+      ],
+      schedule: [
+        'before 8am on Monday',
+      ],
+    },
+    {
+      matchUpdateTypes: [
+        'major'
+      ],
+      matchManagers: [
+        'github-actions',
+      ],
+      semanticCommitType: 'build',
+      addLabels: [
+        'github_actions',
+      ],
+      schedule: [
+        'before 8am on Monday',
+      ],
+    },
+    {
+      groupName: '{{categories}}',
+      matchCategories: [
+        'docker',
+        'terraform',
+      ],
+      matchUpdateTypes: [
+        '!lockFileMaintenance',
+      ],
+      semanticCommitType: 'build',
+      schedule: [
+        'before 8am on Monday',
+      ],
+    },
+    {
+      matchUpdateTypes: [
+        'major'
+      ],
+      matchManagers: [
+        '!github-actions',
+      ],
+      dependencyDashboardApproval: true,
+    },
+    {
+      matchManagers: [
+        "gomod"
+      ],
+      matchUpdateTypes: [
+        "major"
+      ],
+      dependencyDashboardApproval: false,
+      prBodyNotes: [
+        ":warning: MAJOR VERSION UPDATE :warning: - if diff is empty, revert last commit, manually update the imports within this project to the new version and re-run go mod tidy."
+      ],
+    },
+    {
+      groupName: "Lock file maintenance golang",
+      matchDepTypes: ["indirect", "replace"],
+      matchCategories: [
+        'golang',
+      ],
+      enabled: true,
+      separateMajorMinor: false,
+      separateMultipleMajor: false,
+      schedule: [
+        'before 8am on Wednesday',
+      ],
+      postUpdateOptions: [
+        'gomodTidy',
+      ],
+    }
+  ],
+  lockFileMaintenance: {
+    enabled: true,
+    commitMessageAction: "Lock file maintenance {{categories}}",
+    branchTopic: "lock-file-maintenance-{{categories}}",
+    schedule: [
+      'before 8am on Wednesday',
+    ],
+  },
+  postUpdateOptions: [
+    'gomodTidy',
+  ],
+  semanticCommits: 'enabled',
+  semanticCommitType: 'build',
+  semanticCommitScope: 'deps',
+  labels: [
+    'dependencies',
+  ],
+}
