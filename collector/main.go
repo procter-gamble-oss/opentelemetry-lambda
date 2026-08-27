@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/open-telemetry/opentelemetry-lambda/collector/lambdalifecycle"
 
@@ -26,6 +27,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/lifecycle"
+	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/logging"
 )
 
 var (
@@ -44,10 +46,11 @@ func main() {
 		return
 	}
 
-	logger := initLogger()
+	logger := logging.NewLogger()
+	startTime := time.Now()
 	logger.Info("Launching OpenTelemetry Lambda extension", zap.String("version", Version))
 
-	ctx, lm := lifecycle.NewManager(context.Background(), logger, Version)
+	ctx, lm := lifecycle.NewManager(context.Background(), logger, Version, startTime)
 
 	// Set the new lifecycle manager as the lifecycle notifier for all other components.
 	lambdalifecycle.SetNotifier(lm)
