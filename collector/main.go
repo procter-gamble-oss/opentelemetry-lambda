@@ -18,13 +18,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-lambda/collector/lambdalifecycle"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/lifecycle"
 	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/logging"
@@ -57,34 +55,4 @@ func main() {
 
 	// Will block until shutdown event is received or cancelled via the context.
 	logger.Info("done", zap.Error(lm.Run(ctx)))
-}
-
-func initLogger() *zap.Logger {
-	lvl := zap.NewAtomicLevelAt(zapcore.WarnLevel)
-	envLvl := getEnvironment("OPENTELEMETRY_EXTENSION_LOG_LEVEL", "warn")
-	// When not set, Getenv returns empty string
-	var err error
-	if envLvl != "" {
-		var userLvl zap.AtomicLevel
-		userLvl, err = zap.ParseAtomicLevel(envLvl)
-		if err == nil {
-			lvl = userLvl
-		}
-	}
-
-	l := zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()), os.Stdout, lvl))
-
-	if err != nil && envLvl != "" {
-		l.Warn("unable to parse log level from environment", zap.Error(err))
-	}
-
-	return l
-}
-
-func getEnvironment(key string, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
 }
